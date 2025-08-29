@@ -90,7 +90,10 @@ router.post("/chat", async(req, res) => {
 
         const assistantReply = await getOpenAIAPIResponse(message);
 
-        thread.messages.push({role: "assistant", content: assistantReply});
+if (assistantReply) {
+    thread.messages.push({ role: "assistant", content: assistantReply });
+}
+
         thread.updatedAt = new Date();
 
         await thread.save();
