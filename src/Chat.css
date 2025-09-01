@@ -1,0 +1,92 @@
+.chats {
+  width: 100%;
+  max-width: 800px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 0 1rem;
+}
+
+.chats::-webkit-scrollbar {
+  width: 5px;
+}
+.chats::-webkit-scrollbar-thumb {
+  background: var(--secondary-accent);
+  border-radius: 10px;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.userDiv, .gptDiv {
+  display: flex;
+  margin-bottom: 1.5rem;
+  animation: popIn 0.4s ease-out forwards;
+}
+
+.userDiv {
+  justify-content: flex-end;
+}
+
+.gptDiv {
+  justify-content: flex-start;
+}
+
+.userMessage {
+  background: linear-gradient(135deg, #e94560, #dd2476);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 20px;
+  font-weight: 500;
+  max-width: 75%;
+  border-bottom-right-radius: 5px;
+}
+
+.gptMessage {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  padding: 12px 20px;
+  border-radius: 20px;
+  max-width: 75%;
+  border-bottom-left-radius: 5px;
+  white-space: pre-wrap;
+}
+
+.code-block {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  font-family: 'Courier New', monospace;
+  overflow-x: auto;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.start-text {
+  text-align: center;
+  margin-top: 1rem;
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+}
+
+.start-text {
+  text-align: center;
+  margin: 1rem 0;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.code-block {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-family: "Courier New", monospace;
+  overflow-x: auto;
+}
