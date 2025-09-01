@@ -1,3 +1,4 @@
+// App.jsx
 import "./App.css";
 import Sidebar from "./Sidebar.jsx";
 import ChatWindow from "./ChatWindow.jsx";
@@ -10,7 +11,7 @@ function App() {
   const [prompt, setPrompt] = useState("");
   const [reply, setReply] = useState(null);
   const [currThreadId, setCurrThreadId] = useState(uuidv1());
-  const [prevChats, setPrevChats] = useState([]); // stores all chats of curr thread
+  const [prevChats, setPrevChats] = useState([]);
   const [newChat, setNewChat] = useState(true);
   const [allThreads, setAllThreads] = useState([]);
 
@@ -30,25 +31,36 @@ function App() {
   };
 
   return (
-    <div className="app">
-      {/* If NOT signed in → show SignIn button */}
+    <div className="root">
       <SignedOut>
         <div className="auth-container">
-          <h2>Please sign in to continue</h2>
-          <SignInButton mode="modal" />
+          <div className="auth-overlay">
+            <div className="auth-content">
+              <h1 className="title">EmoRoute</h1>
+              <p className="subtitle">
+                Emotion-Based Travel. <br /> Experience journeys like never before.
+              </p>
+              <SignInButton mode="modal">
+                <button className="enter-btn">Enter the Experience</button>
+              </SignInButton>
+            </div>
+          </div>
         </div>
       </SignedOut>
 
-      {/* If signed in → show the app */}
       <SignedIn>
-        <header className="header">
-          <h1>Welcome to the Dashboard</h1>
-          <UserButton />
-        </header>
-
         <MyContext.Provider value={providerValues}>
-          <Sidebar />
-          <ChatWindow />
+          <div className="dashboard">
+            <header className="dashboard-header">
+              <div className="logo">EmoRoute</div>
+              <UserButton afterSignOutUrl="/" />
+            </header>
+
+            <main className="dashboard-main">
+              <Sidebar />
+              <ChatWindow />
+            </main>
+          </div>
         </MyContext.Provider>
       </SignedIn>
     </div>

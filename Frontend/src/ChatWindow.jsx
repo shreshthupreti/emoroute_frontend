@@ -2,100 +2,110 @@ import "./ChatWindow.css";
 import Chat from "./Chat.jsx";
 import { MyContext } from "./MyContext.jsx";
 import { useContext, useState, useEffect } from "react";
-import {ScaleLoader} from "react-spinners";
+import { ScaleLoader } from "react-spinners";
 
 function ChatWindow() {
-    const {prompt, setPrompt, reply, setReply, currThreadId, setPrevChats, setNewChat} = useContext(MyContext);
-    const [loading, setLoading] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
+  const {
+    prompt,
+    setPrompt,
+    reply,
+    setReply,
+    currThreadId,
+    setPrevChats,
+    setNewChat,
+  } = useContext(MyContext);
 
-    const getReply = async () => {
-        setLoading(true);
-        setNewChat(false);
+  const [loading, setLoading] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-        console.log("message ", prompt, " threadId ", currThreadId);
-        const options = {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                message: prompt,
-                threadId: currThreadId
-            })
-        };
+  const getReply = async () => {
+    if (!prompt.trim()) return;
 
-        try {
-            const response = await fetch("http://localhost:8080/api/chat", options);
-            const res = await response.json();
-            console.log(res);
-            setReply(res.reply);
-        } catch(err) {
-            console.log(err);
-        }
-        setLoading(false);
+    setLoading(true);
+    setNewChat(false);
+
+    try {
+      const response = await fetch("http://localhost:8080/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: prompt,
+          threadId: currThreadId,
+        }),
+      });
+
+      const res = await response.json();
+      setReply(res.reply);
+    } catch (err) {
+      console.error("Failed to fetch reply:", err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    //Append new chat to prevChats
-    useEffect(() => {
-        if(prompt && reply) {
-            setPrevChats(prevChats => (
-                [...prevChats, {
-                    role: "user",
-                    content: prompt
-                },{
-                    role: "assistant",
-                    content: reply
-                }]
-            ));
-        }
-
-        setPrompt("");
-    }, [reply]);
-
-
-    const handleProfileClick = () => {
-        setIsOpen(!isOpen);
+  useEffect(() => {
+    if (prompt && reply) {
+      setPrevChats((prev) => [
+        ...prev,
+        { role: "user", content: prompt },
+        { role: "assistant", content: reply },
+      ]);
+      setPrompt("");
+      setReply(null); // Prevent duplicate additions
     }
+  }, [reply]);
 
-    return (
-        <div className="chatWindow">
-            <div className="navbar">
-                <span>EmoRoute<i className="fa-solid fa-chevron-down"></i></span>
-                <div className="userIconDiv" onClick={handleProfileClick}>
-                    <span className="userIcon"><i className="fa-solid fa-user"></i></span>
-                </div>
-            </div>
-            {
-                isOpen && 
-                <div className="dropDown">
-                    <div className="dropDownItem"><i class="fa-solid fa-gear"></i> Settings</div>
-                    <div className="dropDownItem"><i class="fa-solid fa-cloud-arrow-up"></i> Upgrade plan</div>
-                    <div className="dropDownItem"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log out</div>
-                </div>
-            }
-            <Chat></Chat>
+  return (
+    <div className="chat-window">
+      <div className="chat-navbar">
+        <span onClick={() => setIsDropdownOpen(!isDropdownOpen)} role="button" aria-label="User menu">
+          EmoRoute <i className="fa-solid fa-chevron-down"></i>
+        </span>
 
-            <ScaleLoader color="#fff" loading={loading}>
-            </ScaleLoader>
-            
-            <div className="chatInput">
-                <div className="inputBox">
-                    <input placeholder="Ask anything"
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter'? getReply() : ''}
-                    >
-                           
-                    </input>
-                    <div id="submit" onClick={getReply}><i className="fa-solid fa-paper-plane"></i></div>
-                </div>
-                <p className="info">
-                    EmoRoutes can make mistakes. Check important info. See Cookie Preferences.
-                </p>
+        {isDropdownOpen && (
+          <div className="chat-dropdown">
+            <div className="dropdown-item">
+              <i className="fa-solid fa-gear"></i> Settings
             </div>
+            <div className="dropdown-item">
+              <i className="fa-solid fa-cloud-arrow-up"></i> Upgrade Plan
+            </div>
+            <div className="dropdown-item">
+              <i className="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+            </div>
+          </div>
+        )}
+      </div>
+
+      <Chat />
+
+      {loading && (
+        <div className="loader-wrapper">
+          <ScaleLoader color="#fff" />
         </div>
-    )
+      )}
+
+      <div className="chat-input">
+        <div className="input-box">
+          <input
+            placeholder="Ask anything..."
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" ? getReply() : null}
+            aria-label="Chat input"
+          />
+          <div className="submit-btn" onClick={getReply} role="button" aria-label="Send message">
+            <i className="fa-solid fa-paper-plane"></i>
+          </div>
+        </div>
+        <p className="input-info">
+          EmoRoutes may make mistakes. Double-check important info. See Cookie Preferences.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default ChatWindow;
