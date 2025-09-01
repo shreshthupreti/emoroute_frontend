@@ -1,7 +1,7 @@
 import "./ChatWindow.css";
 import Chat from "./Chat.jsx";
 import { MyContext } from "./MyContext.jsx";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState } from "react";
 import { ScaleLoader } from "react-spinners";
 
 function ChatWindow() {
@@ -25,19 +25,28 @@ function ChatWindow() {
     setNewChat(false);
 
     try {
-      const response = await fetch("http://localhost:8080/api/chat", {
+      const response = await fetch("https://emoroute-backend.onrender.com/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           message: prompt,
-          threadId: currThreadId,
+          threadId: currThreadId || "default-thread",
         }),
       });
 
       const res = await response.json();
+
+      // Update chat history with user and assistant replies
+      setPrevChats((prev) => [
+        ...prev,
+        { role: "user", content: prompt },
+        { role: "assistant", content: res.reply },
+      ]);
+
       setReply(res.reply);
+      setPrompt("");
     } catch (err) {
       console.error("Failed to fetch reply:", err);
     } finally {
@@ -45,22 +54,14 @@ function ChatWindow() {
     }
   };
 
-  useEffect(() => {
-    if (prompt && reply) {
-      setPrevChats((prev) => [
-        ...prev,
-        { role: "user", content: prompt },
-        { role: "assistant", content: reply },
-      ]);
-      setPrompt("");
-      setReply(null); // Prevent duplicate additions
-    }
-  }, [reply]);
-
   return (
     <div className="chat-window">
       <div className="chat-navbar">
-        <span onClick={() => setIsDropdownOpen(!isDropdownOpen)} role="button" aria-label="User menu">
+        <span
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          role="button"
+          aria-label="User menu"
+        >
           EmoRoute <i className="fa-solid fa-chevron-down"></i>
         </span>
 
@@ -93,15 +94,21 @@ function ChatWindow() {
             placeholder="Ask anything..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" ? getReply() : null}
+            onKeyDown={(e) => e.key === "Enter" && getReply()}
             aria-label="Chat input"
           />
-          <div className="submit-btn" onClick={getReply} role="button" aria-label="Send message">
+          <div
+            className="submit-btn"
+            onClick={getReply}
+            role="button"
+            aria-label="Send message"
+          >
             <i className="fa-solid fa-paper-plane"></i>
           </div>
         </div>
         <p className="input-info">
-          EmoRoutes may make mistakes. Double-check important info. See Cookie Preferences.
+          EmoRoutes may make mistakes. Double-check important info. See Cookie
+          Preferences.
         </p>
       </div>
     </div>
